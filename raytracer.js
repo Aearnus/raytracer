@@ -14,9 +14,8 @@ var Camera = function(direction, position) { //rotation on the x, y, and z axis
 			for(var j = 0; j < canvas.height; j++) {
 				var currentRay = new Ray(direction, new Vector.Rect((position.x + (i * distanceX)) - (position.x + (canvas.width * distanceX)) / 2, position.y, position.z + (j * distanceZ) - (position.z + (canvas.height * distanceZ)) / 2), [i, j]);
 				currentRay.update();
-				progressBar.innerHTML = (((canvas.width * i) + j) / (canvas.width * canvas.height)) * 100 + "%";
-
 			}
+			console.log((((canvas.width * i) + j) / (canvas.width * canvas.height)) * 100 + "%");
 		}
 	}
 }
@@ -39,35 +38,27 @@ var Ray = function(direction, position, pixel) { //pixel = what pixel this ray w
 		ctx.fillRect(pixel[0], pixel[1], 1, 1);
 	}
 	this.update = function() {
-		this.iterations += 1;
-		position.x += -precision * Math.sin(direction.rz); //trig functions take radians
-		position.y += precision * Math.cos(direction.rx);
-		position.z += precision * Math.sin(direction.rx);
-		//console.log(position.z.toString())
-		for (var sphereIndex = 0; sphereIndex < Scene.length; sphereIndex++) {
-			var currentSphere = Scene[sphereIndex];
-			//console.log(position.toString() + " rect = " + (Vector.subtract(position, currentSphere.position)).toString() + " polar = " + (Vector.subtract(position, currentSphere.position).toPolar()).toString());
-			//if (Math.abs(position.x - currentSphere.x) < currentSphere.r + contactMarginOfError &&
-			//	Math.abs(position.y - currentSphere.y) < currentSphere.r + contactMarginOfError &&
-			//	Math.abs(position.z - currentSphere.z) < currentSphere.r + contactMarginOfError) { //if a ray is colliding with a sphere
+		while(!this.done) {
+			this.iterations += 1;
+			position.x += -precision * Math.sin(direction.rz); //trig functions take radians
+			position.y += precision * Math.cos(direction.rx);
+			position.z += precision * Math.sin(direction.rx);
+			for (var sphereIndex = 0; sphereIndex < Scene.length; sphereIndex++) {
+				var currentSphere = Scene[sphereIndex];
 				var distanceToSphere = Vector.subtract(currentSphere.position, position).toPolar().magnitude;
-				//console.log(distanceToSphere.toString());
 				if(distanceToSphere < currentSphere.r) {
-				this.bounces += 1;
-				this.color = currentSphere.color;
+					this.bounces += 1;
+					this.color = currentSphere.color;
+					this.done = true;
+					//to reflect a vector over a normal:
+					//Vnew = -2*(V dot N)*N + V
+				}
+			}
+			if(this.iterations > maxIterations) {
 				this.done = true;
-				//to reflect a vector over a normal:
-				//Vnew = -2*(V dot N)*N + V
 			}
 		}
-		if(this.iterations > maxIterations) {
-			this.done = true;
-		}
-		if(this.done) {
-			this.draw();
-		} else {
-			setTimeout(this.update, 1);
-		}
+		this.draw();
 	}
 }
 
@@ -78,7 +69,7 @@ window.onload = function() {
 	Scene = [new Sphere(new Vector.Rect(0, 20, 0), 100, "#0000FF"),
 			 new Sphere(new Vector.Rect(-50, 6, -30), 24, "#FF0000"),
 			 new Sphere(new Vector.Rect(50, 6, -30), 24, "#FF0000"),
-			 new Sphere(new Vector.Rect(0, 6, 20), 15, "#FF0000")];
+			 new Sphere(new Vector.Rect(0, 0, 6), 15, "#FF0000")];
 	SceneCamera = new Camera(new Vector.Polar(1, 0, 0), new Vector.Rect(0,0,0));
-	SceneCamera.createRays(1, 1);
+	//SceneCamera.createRays(1, 1);
 }
