@@ -28,7 +28,7 @@ var Camera = function(direction, position) { //rotation on the x, y, and z axis
 //rotation on the y axis is "tilt", it isn't necessary for a ray. x and z are all that are needed to point in any direction
 //y = forward (movement if no angle)
 var precision = 0.1; //lower number = higher precision (0 bounded)
-var maxIterations = 250; //max times that a ray can go without rendering as white
+var maxIterations = 150; //max times that a ray can go without rendering as white
 var Ray = function(direction, position, pixel) { //pixel = what pixel this ray was sent from
 	this.color = "#FFFFFF";
 	this.iterations = 0;
